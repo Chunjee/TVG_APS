@@ -1,27 +1,23 @@
-
 #NoEnv
 #NoTrayIcon
-#SingleInstance force
+#SingleInstance Force
 SetBatchLines -1 ;Go as fast as CPU will allow
-SendMode Input
+CoordMode, Mouse, Screen
+CoordMode, Pixel, Screen
+SendMode InputThenPlay
 
 ;~~~~~~~~~~~~~~~~~~~~~
 ;dependecies
 ;~~~~~~~~~~~~~~~~~~~~~
-;#Include %A_ScriptDir%\Functions
-
-
+;None
 
 The_ProjectName := "TVG APS"
-The_VersionName := "v0.0.1"
+The_VersionName := "v0.1.0"
 
 
 ;~~~~~~~~~~~~~~~~~~~~~
 ;Startup
 ;~~~~~~~~~~~~~~~~~~~~~
-SetWorkingDir %A_ScriptDir%
-Working_Directory = %A_WorkingDir%
-CoordMode, Mouse, Screen
 
 BuildGUI()
 
@@ -32,17 +28,17 @@ BuildGUI()
 ;set main screen search area vars
 Area_TopX := 1
 Area_TopY := 1
-Area_LowX := 2222
-Area_LowY := 2000
+Area_LowX := 1670
+Area_LowY := 1040
 
 ;enter main loop forever
 Loop,
 {
 	If (Active_Bool = True) {
-	Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\DDScheckmark.png")
-	Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\stillcheckmarked.png")
-	Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\Yes.png")
-	Sleep, 500
+		Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\DDScheckmark.png")
+		Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\stillcheckmarked.png")
+		Fn_WholeScreenClickAll(A_ScriptDir . "\Data\Images\Yes.png")
+		Sleep, 30
 	}
 }
 
@@ -50,30 +46,26 @@ Loop,
 ;~~~~~~~~~~~~~~~~~~~~~
 ;Controls
 ;~~~~~~~~~~~~~~~~~~~~~
+
 F11::
+#!r::
 ;Turn On
-Active_Bool := True
+Sb_TurnOn()
 Return
 
 F12::
+#!s::
 ;Turn Off
-Active_Bool := False
+Sb_TurnOff()
 Return
-
-
-
-F7::
-Reload
-Return
-
 
 
 BuildGUI()
 {
 Global
 
-Gui, Main: Add, Button, x480 y4 w60 h30 gButton-Start, Start F11
-Gui, Main: Add, Button, x540 y4 w60 h30 gButton-Stop, Stop F12
+Gui, Main: Add, Button, x480 y4 w60 h30 gButton-Start, Start (F11)
+Gui, Main: Add, Button, x540 y4 w60 h30 gButton-Stop, Stop (F12)
 ;Gui, Main: Add, Button, x550 y4 w50 h30 gButton-Main, Go
 
 Gui, Main: Add, Picture, x12 y4 , %A_ScriptDir%\Data\Images\Title.png
@@ -108,13 +100,11 @@ ExitApp
 
 
 Button-Start:
-Active_Bool := True
-GuiControl, Text, Gui_CurrentStatus, Running
+Sb_TurnOn()
 Return
 
 Button-Stop:
-Active_Bool := False
-GuiControl, Text, Gui_CurrentStatus, Stopped
+Sb_TurnOff()
 Return
 
 
@@ -154,6 +144,7 @@ ExitApp
 Fn_AreaClickAll(para_Image)
 {
 global
+
 SearchClickandReport(Area_TopX,Area_TopY,Area_LowX,Area_LowY,para_Image,"40")
 Return
 }
@@ -162,6 +153,7 @@ Return
 Fn_WholeScreenClickAll(para_Image)
 {
 global
+
 SearchClickandReport(Area_TopX,Area_TopY,Area_LowX,Area_LowY,para_Image,"40")
 Return
 }
@@ -206,7 +198,8 @@ ImageSearch , Mouse_X, Mouse_Y, %1X%, %1Y%, %2X%, %2Y%, *%Variation% %ImagePath%
 	if (!Errorlevel) { ;if found
 		;grab users current mouse location for later
 		MouseGetPos, xpos, ypos 
-		;Msgbox, The cursor is at X%xpos% Y%ypos%. 
+		;Adjust Mouse vars slightly
+		Mouse_Y += 2
 		
 		;Click the target
 		Click %Mouse_X%, %Mouse_Y%
@@ -215,7 +208,7 @@ ImageSearch , Mouse_X, Mouse_Y, %1X%, %1Y%, %2X%, %2Y%, *%Variation% %ImagePath%
 		;ControlClick, X%Mouse_X% Y%Mouse_Y%,
 		;MouseMove, %Mouse_X%, %Mouse_Y%
 		;msgbox, here
-		Sleep 100
+		Sleep 60
 		
 		;Return Mouse to orginal location
 		MouseMove, %xpos%, %ypos%, 0
@@ -226,6 +219,20 @@ ImageSearch , Mouse_X, Mouse_Y, %1X%, %1Y%, %2X%, %2Y%, *%Variation% %ImagePath%
 }
 Return
 
+
+Sb_TurnOn() {
+	global
+
+	GuiControl, Main:Text, Gui_CurrentStatus, Running
+	Active_Bool := True
+}
+
+Sb_TurnOff() {
+	global
+
+	GuiControl, Main:Text, Gui_CurrentStatus, Stopped
+	Active_Bool := False
+}
 
 ;~~~~~~~~~~~~~~~~~~~~~
 ;Resize Windows
